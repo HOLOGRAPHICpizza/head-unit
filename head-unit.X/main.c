@@ -42,6 +42,7 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+#include "OLED.h"
 
 /*
                          Main application
@@ -62,7 +63,22 @@ void main(void)
     //INTERRUPT_GlobalInterruptDisable();
     INTCON0bits.IPEN = 0;
     INTCON0bits.GIE = 0;
-
+    
+    OLED_init();
+    uint8_t col = 0;
+    
+    //OLED_cmd(0x80 + col++);
+    OLED_data('A');
+    //OLED_cmd(0x80 + col++);
+    OLED_data('B');
+    //OLED_cmd(0x80 + col++);
+    OLED_data('C');
+    //OLED_cmd(0x80 + col++);
+    OLED_data('D');
+    //OLED_cmd(0x80 + col++);
+    OLED_data('E');
+    
+    
     while (1)
     {
         __delay_ms(250);
