@@ -31,7 +31,7 @@ void debugConsoleRX(void) {
     
     // newline?
     //TODO: This only works with screen for some reason
-    if(c == '\r' || c == '\n') {
+    if(c == '\r') {
         putch('\n');
         
         // check for race condition
@@ -74,7 +74,8 @@ void main(void) {
     OLED_init();
     
     INTERRUPT_Initialize();
-    INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptHighEnable();
+    INTERRUPT_GlobalInterruptLowEnable();
     
     __delay_ms(10);
     printf("\r\nBOOT\r\n");
@@ -91,6 +92,7 @@ void main(void) {
                 hex[0] = debugConsoleCmd[1];
                 hex[1] = debugConsoleCmd[2];
                 uint8_t byte = (uint8_t) strtoul(hex, NULL, 16);
+                
                 if(first == 'C') {
                     OLED_cmd(byte);
                 }
@@ -99,8 +101,7 @@ void main(void) {
                 }
             }
             
-            
-            // clear flag last
+            // release lock on cmd string
             debugConsoleCmdReady = false;
         }
         
