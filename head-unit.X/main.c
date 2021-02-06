@@ -11,9 +11,14 @@
 #include "mcc_generated_files/mcc.h"
 #include "OLED.h"
 #include <pic18.h>
+#include <string.h>
 
 #define RX_BUFFER_SIZE 64
 #define RX_LINE_LENGTH 64
+
+#define NOP() (scratch++)
+
+static volatile uint8_t scratch;
 
 static volatile uint8_t debugConsoleBuffer[RX_BUFFER_SIZE];
 static volatile uint8_t debugConsoleBufferHead = 0;
@@ -27,15 +32,15 @@ static volatile uint8_t RN52_bufferTail = 0;
 static volatile bool RN52_lineReady = false;
 static volatile char RN52_line[RX_LINE_LENGTH];
 
-void panic(void) {
-    printf("PANIC");        // this wont print from inside an ISR
+void panic(uint8_t vector) {
+    printf("PANIC %u", vector);        // this wont print from inside an ISR
     while(true) {
         __delay_ms(50);
         HEARTBEAT_Toggle();
     }
 }
 
-void bufferAppend(uint8_t buffer[], uint8_t *head, uint8_t byte) {
+void bufferAppend(uint8_t buffer[], uint8_t *head, char byte) {
     uint8_t h = *head;
     buffer[h] = byte;
     *head = ++h;
@@ -69,7 +74,7 @@ void debugConsoleRX(void) {
         // check for race condition
         if(debugConsoleCmdReady) {
             // oh shit we lost the race
-            panic();
+            panic(1);
         }
         
         // build string from buffer
@@ -81,12 +86,17 @@ void debugConsoleRX(void) {
     
     // panic character
     else if(c == '^') {
-        panic();
+        panic(2);
+    }
+    
+    // ignore
+    else if(c == '\n') {
+        NOP();
     }
     
     else {
         // add to buffer
-        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, (uint8_t) c);
+        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, c);
     }
 }
 
@@ -120,7 +130,33 @@ void RN52_RX(void) {
     
     // get character and echo
     char c = getch2();
-    putch(c);
+    //putch(c);
+    
+    // newline?
+    if(c == '\r') {
+        
+        // check for race condition
+        if(RN52_lineReady) {
+            // oh shit we lost the race
+            panic(3);
+        }
+        
+        // build string from buffer
+        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, RN52_line);
+        
+        // set flag and exit
+        RN52_lineReady = true;
+    }
+    
+    // ignore
+    else if(c == '\n') {
+        NOP();
+    }
+    
+    else {
+        // add to buffer
+        bufferAppend(RN52_buffer, &RN52_bufferHead, (uint8_t) c);
+    }
 }
 
 void main(void) {
@@ -174,9 +210,25 @@ void main(void) {
                 putch2('\r');
                 putch2('\n');
             }
+            else if(first == 'V') {
+                putch2('V');
+                putch2('\r');
+                putch2('\n');
+            }
             
             // release lock on cmd string
             debugConsoleCmdReady = false;
+        }
+        
+        if(RN52_lineReady) {
+            char lineCopy[RX_LINE_LENGTH];
+            strncpy(lineCopy, RN52_line, RX_LINE_LENGTH);
+            // release lock on string
+            RN52_lineReady = false;
+            
+            printf("got line: %s\r\n", lineCopy);
+            
+            
         }
         
         // maybe make this a timer
