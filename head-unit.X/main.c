@@ -49,6 +49,12 @@ void debugConsoleRX(void) {
         // set flag and exit
         debugConsoleCmdReady = true;
     }
+    
+    // panic character
+    else if(c == '^') {
+        panic();
+    }
+    
     else {
         // add to buffer
         debugConsoleBuffer[debugConsoleBufferHead++] = c;
@@ -84,12 +90,10 @@ void main(void) {
     OLED_data('E');*/
     
     
-    while (1)
+    while (true)
     {
         if(debugConsoleCmdReady) {
             printf("got cmd: %s\r\n", debugConsoleCmd);
-            
-            __delay_ms(1000);
             
             // clear flag last
             debugConsoleCmdReady = false;
