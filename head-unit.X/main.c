@@ -12,11 +12,20 @@
 #include "OLED.h"
 #include <pic18.h>
 
-static volatile uint8_t debugConsoleBuffer[64];
+#define RX_BUFFER_SIZE 64
+#define RX_LINE_LENGTH 64
+
+static volatile uint8_t debugConsoleBuffer[RX_BUFFER_SIZE];
 static volatile uint8_t debugConsoleBufferHead = 0;
 static volatile uint8_t debugConsoleBufferTail = 0;
 static volatile bool debugConsoleCmdReady = false;
-static volatile char debugConsoleCmd[64];
+static volatile char debugConsoleCmd[RX_LINE_LENGTH];
+
+static volatile uint8_t RN52_buffer[RX_BUFFER_SIZE];
+static volatile uint8_t RN52_bufferHead = 0;
+static volatile uint8_t RN52_bufferTail = 0;
+static volatile bool RN52_lineReady = false;
+static volatile char RN52_line[RX_LINE_LENGTH];
 
 void panic(void) {
     printf("PANIC");        // this wont print from inside an ISR
@@ -24,6 +33,22 @@ void panic(void) {
         __delay_ms(50);
         HEARTBEAT_Toggle();
     }
+}
+
+void bufferAppend(uint8_t buffer[], uint8_t *head, uint8_t byte) {
+    uint8_t h = *head;
+    buffer[h] = byte;
+    *head = ++h;
+    if(RX_BUFFER_SIZE <= *head) {
+        *head = 0;
+    }
+}
+
+void buffer2string(uint8_t buffer[], uint8_t *head, uint8_t *tail, char string[]) {
+    for(uint8_t i=0; i < *head; i++) {
+        string[i] = (char) buffer[*tail + i];
+    }
+    *tail = *head;
 }
 
 // UART1 RX ISR
@@ -48,10 +73,7 @@ void debugConsoleRX(void) {
         }
         
         // build string from buffer
-        for(uint8_t i=0; i < debugConsoleBufferHead; i++) {
-            debugConsoleCmd[i] = debugConsoleBuffer[debugConsoleBufferTail + i];
-        }
-        debugConsoleBufferTail = debugConsoleBufferHead;
+        buffer2string(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferTail, debugConsoleCmd);
         
         // set flag and exit
         debugConsoleCmdReady = true;
@@ -64,11 +86,7 @@ void debugConsoleRX(void) {
     
     else {
         // add to buffer
-        debugConsoleBuffer[debugConsoleBufferHead++] = c;
-        if(sizeof(debugConsoleBuffer) <= debugConsoleBufferHead)
-        {
-            debugConsoleBufferHead = 0;
-        }
+        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, (uint8_t) c);
     }
 }
 
@@ -81,6 +99,18 @@ void putch2(char txData)
 {
     UART2_Write(txData);
 }
+
+/* Metadata response example:
+
+Title=Little Pink Plastic Bags
+Artist=Gorillaz
+Album=The Fall
+TrackNumber=1
+TrackCount=1
+Genre=<unknown>
+Time(ms)=189622
+
+ */
 
 // UART2 RX ISR
 // RN52
@@ -111,9 +141,10 @@ void main(void) {
     INTERRUPT_GlobalInterruptLowEnable();
     
     __delay_ms(10);
-    printf("\r\nBOOT\r\n");
+    printf("\r\n\r\nBOOT\r\n");
     __delay_ms(10);
     
+    // get RN52 firmware version
     putch2('V');
     putch2('\r');
     putch2('\n');
@@ -137,8 +168,9 @@ void main(void) {
                     OLED_data(byte);
                 }
             }
-            else if(first == 'V') {
-                putch2('V');
+            else if(first == 'M') {
+                putch2('A');
+                putch2('D');
                 putch2('\r');
                 putch2('\n');
             }
