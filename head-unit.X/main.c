@@ -9,8 +9,17 @@ static volatile uint8_t debugConsoleBuffer[64];
 static volatile uint8_t debugConsoleBufferHead = 0;
 static volatile uint8_t debugConsoleBufferTail = 0;
 static volatile bool debugConsoleCmdReady = false;
+static volatile char debugConsoleCmd[64];
 
-// called on UART1 RX interrupt
+void panic(void) {
+    printf("PANIC");        // this wont print from inside an ISR
+    while(true) {
+        __delay_ms(50);
+        HEARTBEAT_Toggle();
+    }
+}
+
+// UART1 RX ISR
 // UART1 is debug console
 void debugConsoleRX(void) {
     // call default ISR
@@ -24,6 +33,19 @@ void debugConsoleRX(void) {
     //TODO: This only works with screen for some reason
     if(c == '\r') {
         putch('\n');
+        
+        // check for race condition
+        if(debugConsoleCmdReady) {
+            // oh shit we lost the race
+            panic();
+        }
+        
+        // build string from buffer
+        for(uint8_t i=0; i < debugConsoleBufferHead; i++) {
+            debugConsoleCmd[i] = debugConsoleBuffer[debugConsoleBufferTail + i];
+        }
+        debugConsoleBufferTail = debugConsoleBufferHead;
+        
         // set flag and exit
         debugConsoleCmdReady = true;
     }
@@ -65,13 +87,16 @@ void main(void) {
     while (1)
     {
         if(debugConsoleCmdReady) {
+            printf("got cmd: %s\r\n", debugConsoleCmd);
+            
+            __delay_ms(1000);
+            
+            // clear flag last
             debugConsoleCmdReady = false;
         }
         
+        // maybe make this a timer
         //__delay_ms(250);
         //HEARTBEAT_Toggle();
     }
 }
-/**
- End of File
-*/
