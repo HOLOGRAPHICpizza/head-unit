@@ -31,7 +31,7 @@ void debugConsoleRX(void) {
     
     // newline?
     //TODO: This only works with screen for some reason
-    if(c == '\r') {
+    if(c == '\r' || c == '\n') {
         putch('\n');
         
         // check for race condition
@@ -71,29 +71,34 @@ void main(void) {
     UART1_Initialize();
     UART1_SetRxInterruptHandler(&debugConsoleRX);
     
+    OLED_init();
+    
     INTERRUPT_Initialize();
     INTERRUPT_GlobalInterruptEnable();
     
-    
-    /*OLED_init();
-    uint8_t col = 0;
-    
-    //OLED_cmd(0x80 + col++);
-    OLED_data('A');
-    //OLED_cmd(0x80 + col++);
-    OLED_data('B');
-    //OLED_cmd(0x80 + col++);
-    OLED_data('C');
-    //OLED_cmd(0x80 + col++);
-    OLED_data('D');
-    //OLED_cmd(0x80 + col++);
-    OLED_data('E');*/
-    
+    __delay_ms(10);
+    printf("\r\nBOOT\r\n");
+    __delay_ms(10);
     
     while (true)
     {
         if(debugConsoleCmdReady) {
-            printf("got cmd: %s\r\n", debugConsoleCmd);
+            //printf("got cmd: %s\r\n", debugConsoleCmd);
+            
+            char first = debugConsoleCmd[0];
+            if(first == 'C' || first == 'D') {
+                char hex[2];
+                hex[0] = debugConsoleCmd[1];
+                hex[1] = debugConsoleCmd[2];
+                uint8_t byte = (uint8_t) strtoul(hex, NULL, 16);
+                if(first == 'C') {
+                    OLED_cmd(byte);
+                }
+                else if(first == 'D') {
+                    OLED_data(byte);
+                }
+            }
+            
             
             // clear flag last
             debugConsoleCmdReady = false;
