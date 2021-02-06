@@ -1,6 +1,13 @@
 // Peak 15 Labs Head Unit
 // for PIC18F26K83
 
+// RN52 Firmware must be V1.16
+// Firmware update tool must be run in win7 compatibility mode,
+// and visual c++ 2005 must be installed.
+// Then you must connect UART at 115200 baud and issue command
+// "SU,01" to permanently set to 9600 baud.
+// What GPIO7 does is unclear.
+
 #include "mcc_generated_files/mcc.h"
 #include "OLED.h"
 #include <pic18.h>
@@ -20,7 +27,7 @@ void panic(void) {
 }
 
 // UART1 RX ISR
-// UART1 is debug console
+// debug console
 void debugConsoleRX(void) {
     // call default ISR
     UART1_Receive_ISR();
@@ -65,11 +72,37 @@ void debugConsoleRX(void) {
     }
 }
 
+char getch2(void)
+{
+    return UART2_Read();
+}
+
+void putch2(char txData)
+{
+    UART2_Write(txData);
+}
+
+// UART2 RX ISR
+// RN52
+void RN52_RX(void) {
+    // call default ISR
+    UART2_Receive_ISR();
+    
+    // get character and echo
+    char c = getch2();
+    putch(c);
+}
+
 void main(void) {
     SYSTEM_Initialize();
-
+    
+    // debug console
     UART1_Initialize();
     UART1_SetRxInterruptHandler(&debugConsoleRX);
+    
+    // RN52
+    UART2_Initialize();
+    UART2_SetRxInterruptHandler(&RN52_RX);
     
     OLED_init();
     
@@ -80,6 +113,10 @@ void main(void) {
     __delay_ms(10);
     printf("\r\nBOOT\r\n");
     __delay_ms(10);
+    
+    putch2('V');
+    putch2('\r');
+    putch2('\n');
     
     while (true)
     {
@@ -99,6 +136,11 @@ void main(void) {
                 else if(first == 'D') {
                     OLED_data(byte);
                 }
+            }
+            else if(first == 'V') {
+                putch2('V');
+                putch2('\r');
+                putch2('\n');
             }
             
             // release lock on cmd string
