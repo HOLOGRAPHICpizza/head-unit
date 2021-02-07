@@ -8,6 +8,8 @@
 // "SU,01" to permanently set to 9600 baud.
 // What GPIO7 does is unclear.
 
+static volatile int getMetadata = 1;
+
 #include "mcc_generated_files/mcc.h"
 #include "OLED.h"
 #include <pic18.h>
@@ -31,6 +33,8 @@ static volatile char RN52_title[RX_LINE_LENGTH];
 static volatile bool RN52_titleReady = false;
 static volatile char RN52_artist[RX_LINE_LENGTH];
 static volatile bool RN52_artistReady = false;
+
+static volatile char lineCopy[RX_LINE_LENGTH];
 
 void panic(uint8_t vector) {
     printf("PANIC %u", vector);        // this wont print from inside an ISR
@@ -133,6 +137,7 @@ void RN52_cmd(char cmd[]) {
         putch2(c);
     }
     putch2('\r');
+    __delay_ms(25);
 }
 
 /* Metadata response example:
@@ -216,11 +221,19 @@ void main(void) {
     INTERRUPT_GlobalInterruptLowEnable();
     
     __delay_ms(10);
-    printf("\r\n\r\nBOOT\r\n");
+    printf("\r\n\r\nPeak 15 Labs Head Unit\r\n");
     __delay_ms(10);
     
-    // get RN52 firmware version
-    RN52_cmd("V");
+    // set device name
+    RN52_cmd("SN,Peak15_Labs");
+    
+    // make disoverabe
+    RN52_cmd("@,1");
+    
+    // get metadata every onece in a while
+    TMR0_Initialize();
+    //TMR0_SetInterruptHandler(&TMR0_method);
+    TMR0_StartTimer();
     
     while (true)
     {
@@ -242,7 +255,6 @@ void main(void) {
                 }
             }*/
             
-            char lineCopy[RX_LINE_LENGTH];
             strncpy(lineCopy, debugConsoleCmd, RX_LINE_LENGTH);
             // release lock on string
             debugConsoleCmdReady = false;
@@ -252,7 +264,6 @@ void main(void) {
         }
         
         if(RN52_titleReady) {
-            char lineCopy[RX_LINE_LENGTH];
             strncpy(lineCopy, RN52_title, RX_LINE_LENGTH);
             // release lock on string
             RN52_titleReady = false;
@@ -262,7 +273,6 @@ void main(void) {
         }
         
         if(RN52_artistReady) {
-            char lineCopy[RX_LINE_LENGTH];
             strncpy(lineCopy, RN52_artist, RX_LINE_LENGTH);
             // release lock on string
             RN52_artistReady = false;
@@ -271,8 +281,11 @@ void main(void) {
             OLED_println(lineCopy, 2);
         }
         
-        // maybe make this a timer
-        //__delay_ms(250);
-        //HEARTBEAT_Toggle();
+        if(getMetadata % 3 == 0) {
+            getMetadata++;
+            
+            HEARTBEAT_Toggle();
+            RN52_cmd("AD");
+        }
     }
 }
