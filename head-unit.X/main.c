@@ -27,8 +27,10 @@ static volatile uint8_t RN52_buffer[RX_BUFFER_SIZE];
 static volatile uint8_t RN52_bufferHead = 0;
 static volatile uint8_t RN52_bufferTail = 0;
 static volatile uint8_t RN52_bufferCount = 0;
-static volatile bool RN52_lineReady = false;
-static volatile char RN52_line[RX_LINE_LENGTH];
+static volatile char RN52_title[RX_LINE_LENGTH];
+static volatile bool RN52_titleReady = false;
+static volatile char RN52_artist[RX_LINE_LENGTH];
+static volatile bool RN52_artistReady = false;
 
 void panic(uint8_t vector) {
     printf("PANIC %u", vector);        // this wont print from inside an ISR
@@ -145,18 +147,32 @@ void RN52_RX(void) {
     
     // newline?
     if(c == '\r') {
-        
-        // check for race condition
-        if(RN52_lineReady) {
-            // oh shit we lost the race
-            panic(3);
-        }
-        
         // build string from buffer
-        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, &RN52_bufferCount, RN52_line);
+        char line[RX_LINE_LENGTH];
+        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, &RN52_bufferCount, line);
         
-        // set flag and exit
-        RN52_lineReady = true;
+        // is this title line?
+        if(strncmp(line, "Title=", 6) == 0) {
+            // check for race condition
+            if(RN52_titleReady) {
+                // oh shit we lost the race
+                panic(3);
+            }
+            
+            strncpy(RN52_title, line, RX_LINE_LENGTH);
+            RN52_titleReady = true;
+        }
+        // artist line?
+        else if(strncmp(line, "Artist=", 7) == 0) {
+            // check for race condition
+            if(RN52_artistReady) {
+                // oh shit we lost the race
+                panic(4);
+            }
+            
+            strncpy(RN52_artist, line, RX_LINE_LENGTH);
+            RN52_artistReady = true;
+        }
     }
     
     // ignore
@@ -231,15 +247,22 @@ void main(void) {
             debugConsoleCmdReady = false;
         }
         
-        if(RN52_lineReady) {
+        if(RN52_titleReady) {
             char lineCopy[RX_LINE_LENGTH];
-            strncpy(lineCopy, RN52_line, RX_LINE_LENGTH);
+            strncpy(lineCopy, RN52_title, RX_LINE_LENGTH);
             // release lock on string
-            RN52_lineReady = false;
+            RN52_titleReady = false;
             
-            printf("got line: %s\r\n", lineCopy);
+            printf("got title: %s\r\n", lineCopy);
+        }
+        
+        if(RN52_artistReady) {
+            char lineCopy[RX_LINE_LENGTH];
+            strncpy(lineCopy, RN52_artist, RX_LINE_LENGTH);
+            // release lock on string
+            RN52_artistReady = false;
             
-            
+            printf("got artist: %s\r\n", lineCopy);
         }
         
         // maybe make this a timer
