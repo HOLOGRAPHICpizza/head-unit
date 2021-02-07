@@ -16,19 +16,17 @@
 #define RX_BUFFER_SIZE 64
 #define RX_LINE_LENGTH 64
 
-#define NOP() (scratch++)
-
-static volatile uint8_t scratch;
-
 static volatile uint8_t debugConsoleBuffer[RX_BUFFER_SIZE];
 static volatile uint8_t debugConsoleBufferHead = 0;
 static volatile uint8_t debugConsoleBufferTail = 0;
+static volatile uint8_t debugConsoleBufferCount = 0;
 static volatile bool debugConsoleCmdReady = false;
 static volatile char debugConsoleCmd[RX_LINE_LENGTH];
 
 static volatile uint8_t RN52_buffer[RX_BUFFER_SIZE];
 static volatile uint8_t RN52_bufferHead = 0;
 static volatile uint8_t RN52_bufferTail = 0;
+static volatile uint8_t RN52_bufferCount = 0;
 static volatile bool RN52_lineReady = false;
 static volatile char RN52_line[RX_LINE_LENGTH];
 
@@ -40,20 +38,28 @@ void panic(uint8_t vector) {
     }
 }
 
-void bufferAppend(uint8_t buffer[], uint8_t *head, char byte) {
+void bufferAppend(uint8_t buffer[], uint8_t *head, uint8_t *count, char byte) {
     uint8_t h = *head;
     buffer[h] = byte;
     *head = ++h;
     if(RX_BUFFER_SIZE <= *head) {
         *head = 0;
     }
+    *count = *count + 1;
 }
 
-void buffer2string(uint8_t buffer[], uint8_t *head, uint8_t *tail, char string[]) {
-    for(uint8_t i=0; i < *head; i++) {
-        string[i] = (char) buffer[*tail + i];
+void buffer2string(uint8_t buffer[], uint8_t *head, uint8_t *tail, uint8_t *count, char string[]) {
+    uint8_t i = 0;
+    while(*count > 0) {
+        string[i] = (char) buffer[*tail];
+        *tail = *tail + 1;
+        if(*tail >= RX_BUFFER_SIZE) {
+            *tail = 0;
+        }
+        *count = *count - 1;
+        i++;
     }
-    *tail = *head;
+    string[i] = 0;
 }
 
 // UART1 RX ISR
@@ -78,7 +84,12 @@ void debugConsoleRX(void) {
         }
         
         // build string from buffer
-        buffer2string(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferTail, debugConsoleCmd);
+        buffer2string(
+                debugConsoleBuffer,
+                &debugConsoleBufferHead,
+                &debugConsoleBufferTail,
+                &debugConsoleBufferCount,
+                debugConsoleCmd);
         
         // set flag and exit
         debugConsoleCmdReady = true;
@@ -96,7 +107,7 @@ void debugConsoleRX(void) {
     
     else {
         // add to buffer
-        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, c);
+        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferCount, c);
     }
 }
 
@@ -142,7 +153,7 @@ void RN52_RX(void) {
         }
         
         // build string from buffer
-        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, RN52_line);
+        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, &RN52_bufferCount, RN52_line);
         
         // set flag and exit
         RN52_lineReady = true;
@@ -155,7 +166,7 @@ void RN52_RX(void) {
     
     else {
         // add to buffer
-        bufferAppend(RN52_buffer, &RN52_bufferHead, (uint8_t) c);
+        bufferAppend(RN52_buffer, &RN52_bufferHead, &RN52_bufferCount, (uint8_t) c);
     }
 }
 
