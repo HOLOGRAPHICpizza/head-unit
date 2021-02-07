@@ -123,6 +123,18 @@ void putch2(char txData)
     UART2_Write(txData);
 }
 
+void RN52_cmd(char cmd[]) {
+    // send command to RN52
+    for(uint8_t i = 0; i < RX_LINE_LENGTH; i++) {
+        char c = cmd[i];
+        if(c == 0) {
+            break;
+        }
+        putch2(c);
+    }
+    putch2('\r');
+}
+
 /* Metadata response example:
 
 Title=Little Pink Plastic Bags
@@ -143,7 +155,7 @@ void RN52_RX(void) {
     
     // get character and echo
     char c = getch2();
-    //putch(c);
+    putch(c);
     
     // newline?
     if(c == '\r') {
@@ -208,16 +220,14 @@ void main(void) {
     __delay_ms(10);
     
     // get RN52 firmware version
-    putch2('V');
-    putch2('\r');
-    putch2('\n');
+    RN52_cmd("V");
     
     while (true)
     {
         if(debugConsoleCmdReady) {
             //printf("got cmd: %s\r\n", debugConsoleCmd);
             
-            char first = debugConsoleCmd[0];
+            /*char first = debugConsoleCmd[0];
             if(first == 'C' || first == 'D') {
                 char hex[2];
                 hex[0] = debugConsoleCmd[1];
@@ -230,21 +240,15 @@ void main(void) {
                 else if(first == 'D') {
                     OLED_data(byte);
                 }
-            }
-            else if(first == 'M') {
-                putch2('A');
-                putch2('D');
-                putch2('\r');
-                putch2('\n');
-            }
-            else if(first == 'V') {
-                putch2('V');
-                putch2('\r');
-                putch2('\n');
-            }
+            }*/
             
-            // release lock on cmd string
+            char lineCopy[RX_LINE_LENGTH];
+            strncpy(lineCopy, debugConsoleCmd, RX_LINE_LENGTH);
+            // release lock on string
             debugConsoleCmdReady = false;
+            
+            // send command straight to RN52
+            RN52_cmd(lineCopy);
         }
         
         if(RN52_titleReady) {
