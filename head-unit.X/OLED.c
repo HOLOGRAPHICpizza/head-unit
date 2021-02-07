@@ -8,7 +8,33 @@ void OLED_cmd(uint8_t cmd) {
 
 void OLED_data(uint8_t data) {
     I2C1_Write1ByteRegister(OLED_ADDR, 0x40, data);
-    __delay_ms(100);
+    __delay_ms(OLED_DELAY);
+}
+
+void OLED_println(char string[], uint8_t lineNum) {
+    if(lineNum == 1) {
+        OLED_cmd(0x80);
+    }
+    else if(lineNum == 2) {
+        OLED_cmd(0xC0);
+    }
+    
+    bool fill = false;
+    for(uint8_t i = 0; i < 16; i++) {
+        char c = string[i];
+        
+        // fill the rest with spaces
+        if(c == 0) {
+            fill = true;
+        }
+        
+        if(!fill) {
+            OLED_data(c);
+        }
+        else {
+            OLED_data(' ');
+        }
+    }
 }
 
 void OLED_init(void) {
@@ -49,13 +75,6 @@ void OLED_init(void) {
     OLED_cmd(0x0C);  //display ON
     __delay_ms(150);
     
-    OLED_data('H');
-    OLED_data('E');
-    OLED_data('L');
-    OLED_data('L');
-    
-    OLED_cmd(0xC0);
-    OLED_data('Y');
-    OLED_data('E');
-    OLED_data('S');
+    OLED_println("    Peak 15", 1);
+    OLED_println("      Labs", 2);
 }

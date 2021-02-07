@@ -159,7 +159,7 @@ void RN52_RX(void) {
                 panic(3);
             }
             
-            strncpy(RN52_title, line, RX_LINE_LENGTH);
+            strncpy(RN52_title, line + 6, RX_LINE_LENGTH - 6);
             RN52_titleReady = true;
         }
         // artist line?
@@ -170,7 +170,7 @@ void RN52_RX(void) {
                 panic(4);
             }
             
-            strncpy(RN52_artist, line, RX_LINE_LENGTH);
+            strncpy(RN52_artist, line + 7, RX_LINE_LENGTH - 7);
             RN52_artistReady = true;
         }
     }
@@ -253,7 +253,8 @@ void main(void) {
             // release lock on string
             RN52_titleReady = false;
             
-            printf("got title: %s\r\n", lineCopy);
+            //printf("got title: %s\r\n", lineCopy);
+            OLED_println(lineCopy, 1);
         }
         
         if(RN52_artistReady) {
@@ -262,7 +263,8 @@ void main(void) {
             // release lock on string
             RN52_artistReady = false;
             
-            printf("got artist: %s\r\n", lineCopy);
+            //printf("got artist: %s\r\n", lineCopy);
+            OLED_println(lineCopy, 2);
         }
         
         // maybe make this a timer
