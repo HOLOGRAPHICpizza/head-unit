@@ -224,13 +224,17 @@ void main(void) {
     printf("\r\n\r\nPeak 15 Labs Head Unit\r\n");
     __delay_ms(10);
     
-    // set device name
-    RN52_cmd("SN,Peak15_Labs");
+    // init RN52
+    RN52_cmd("SN,Peak15_Labs"); // set device name
+    RN52_cmd("S|,0103");        // I2S 24bit 48kHz
+    RN52_cmd("S%,1000");        // disable all extended features except track change event
+    RN52_cmd("SC,240420");      // service class car audio
+    RN52_cmd("SD,04");          // A2DP protocol only
+    RN52_cmd("SK,04");          // A2DP protocol only
+    RN52_cmd("SA,0");           // open authentication
+    RN52_cmd("@,1");            // make disoverabe
     
-    // make disoverabe
-    RN52_cmd("@,1");
-    
-    // get metadata every onece in a while
+    // idk if im gona use the timer
     TMR0_Initialize();
     //TMR0_SetInterruptHandler(&TMR0_method);
     TMR0_StartTimer();
@@ -285,7 +289,7 @@ void main(void) {
             getMetadata++;
             
             HEARTBEAT_Toggle();
-            RN52_cmd("AD");
+            //RN52_cmd("AD");
         }
     }
 }

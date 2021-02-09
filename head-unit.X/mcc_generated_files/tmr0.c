@@ -133,8 +133,8 @@ void __interrupt(irq(TMR0),base(8)) TMR0_ISR()
 void TMR0_CallBack(void)
 {
     // Add your custom callback code here
-    extern int getMetadata;
-    getMetadata++;
+    //extern int getMetadata;
+    //getMetadata++;
 
     if(TMR0_InterruptHandler)
     {
