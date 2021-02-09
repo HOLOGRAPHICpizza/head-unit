@@ -1,11 +1,4 @@
-/* 
- * File:   OLED.h
- * Author: michael
- *
- * Created on January 23, 2021, 2:43 PM
- */
-
-#include "mcc_generated_files/mcc.h"
+#include "shared.h"
 #include "mcc_generated_files/examples/i2c1_master_example.h"
 
 #define OLED_ADDR 0x3C
