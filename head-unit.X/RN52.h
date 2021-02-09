@@ -1,9 +1,9 @@
 #include "shared.h"
 
-static volatile char RN52_title[RX_LINE_LENGTH];
-static volatile bool RN52_titleReady = false;
-static volatile char RN52_artist[RX_LINE_LENGTH];
-static volatile bool RN52_artistReady = false;
+bool RN52_titleReady(void);
+void RN52_getTitle(char destString[]);
+bool RN52_artistReady(void);
+void RN52_getArtist(char destString[]);
 
 char getch2(void);
 void putch2(char txData);

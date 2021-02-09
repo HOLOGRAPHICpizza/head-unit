@@ -1,9 +1,32 @@
 #include "RN52.h"
 
+static volatile char RN52_title[RX_LINE_LENGTH];
+static volatile bool _RN52_titleReady = false;
+static volatile char RN52_artist[RX_LINE_LENGTH];
+static volatile bool _RN52_artistReady = false;
+
 static volatile uint8_t RN52_buffer[RX_BUFFER_SIZE];
 static volatile uint8_t RN52_bufferHead = 0;
 static volatile uint8_t RN52_bufferTail = 0;
 static volatile uint8_t RN52_bufferCount = 0;
+
+bool RN52_titleReady(void) {
+    return _RN52_titleReady;
+}
+
+void RN52_getTitle(char destString[]) {
+    strncpy(destString, RN52_title, RX_LINE_LENGTH);
+    _RN52_titleReady = false;
+}
+
+bool RN52_artistReady(void) {
+    return _RN52_artistReady;
+}
+
+void RN52_getArtist(char destString[]) {
+    strncpy(destString, RN52_artist, RX_LINE_LENGTH);
+    _RN52_artistReady = false;
+}
 
 char getch2(void) {
     return UART2_Read();
@@ -57,24 +80,24 @@ void RN52_RX(void) {
         // is this title line?
         if(strncmp(line, "Title=", 6) == 0) {
             // check for race condition
-            if(RN52_titleReady) {
+            if(_RN52_titleReady) {
                 // oh shit we lost the race
                 panic(3);
             }
             
             strncpy(RN52_title, line + 6, RX_LINE_LENGTH - 6);
-            RN52_titleReady = true;
+            _RN52_titleReady = true;
         }
         // artist line?
         else if(strncmp(line, "Artist=", 7) == 0) {
             // check for race condition
-            if(RN52_artistReady) {
+            if(_RN52_artistReady) {
                 // oh shit we lost the race
                 panic(4);
             }
             
             strncpy(RN52_artist, line + 7, RX_LINE_LENGTH - 7);
-            RN52_artistReady = true;
+            _RN52_artistReady = true;
         }
     }
     

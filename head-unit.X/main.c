@@ -13,64 +13,9 @@
 #include "shared.h"
 #include "OLED.h"
 #include "RN52.h"
-
-static volatile uint8_t debugConsoleBuffer[RX_BUFFER_SIZE];
-static volatile uint8_t debugConsoleBufferHead = 0;
-static volatile uint8_t debugConsoleBufferTail = 0;
-static volatile uint8_t debugConsoleBufferCount = 0;
-static volatile bool debugConsoleCmdReady = false;
-static volatile char debugConsoleCmd[RX_LINE_LENGTH];
+#include "DebugConsole.h"
 
 static volatile char lineCopy[RX_LINE_LENGTH];
-
-// UART1 RX ISR
-// debug console
-void debugConsoleRX(void) {
-    // call default ISR
-    UART1_Receive_ISR();
-    
-    // get character and echo
-    char c = getch();
-    putch(c);
-    
-    // newline?
-    //TODO: This only works with screen for some reason
-    if(c == '\r') {
-        putch('\n');
-        
-        // check for race condition
-        if(debugConsoleCmdReady) {
-            // oh shit we lost the race
-            panic(1);
-        }
-        
-        // build string from buffer
-        buffer2string(
-                debugConsoleBuffer,
-                &debugConsoleBufferHead,
-                &debugConsoleBufferTail,
-                &debugConsoleBufferCount,
-                debugConsoleCmd);
-        
-        // set flag and exit
-        debugConsoleCmdReady = true;
-    }
-    
-    // panic character
-    else if(c == '^') {
-        panic(2);
-    }
-    
-    // ignore
-    else if(c == '\n') {
-        NOP();
-    }
-    
-    else {
-        // add to buffer
-        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferCount, c);
-    }
-}
 
 void main(void) {
     SYSTEM_Initialize();
@@ -94,13 +39,22 @@ void main(void) {
     __delay_ms(10);
     
     // init RN52
+    // the printf commands seems necessary to have a delay between commands
+    printf("name\r\n");
     RN52_cmd("SN,Peak15_Labs"); // set device name
+    printf("I2S\r\n");
     RN52_cmd("S|,0103");        // I2S 24bit 48kHz
+    printf("track change event\r\n");
     RN52_cmd("S%,1000");        // disable all extended features except track change event
+    printf("service class\r\n");
     RN52_cmd("SC,240420");      // service class car audio
+    printf("A2DP\r\n");
     RN52_cmd("SD,04");          // A2DP protocol only
+    printf("A2DP\r\n");
     RN52_cmd("SK,04");          // A2DP protocol only
+    printf("auth\r\n");
     RN52_cmd("SA,0");           // open authentication
+    printf("discoverable\r\n");
     RN52_cmd("@,1");            // make disoverabe
     
     // idk if im gona use the timer
@@ -110,7 +64,7 @@ void main(void) {
     
     while (true)
     {
-        if(debugConsoleCmdReady) {
+        if(DebugConsole_cmdReady()) {
             //printf("got cmd: %s\r\n", debugConsoleCmd);
             
             /*char first = debugConsoleCmd[0];
@@ -128,29 +82,21 @@ void main(void) {
                 }
             }*/
             
-            strncpy(lineCopy, debugConsoleCmd, RX_LINE_LENGTH);
-            // release lock on string
-            debugConsoleCmdReady = false;
+            DebugConsole_getCmd(lineCopy);
             
             // send command straight to RN52
             RN52_cmd(lineCopy);
         }
         
-        if(RN52_titleReady) {
-            strncpy(lineCopy, RN52_title, RX_LINE_LENGTH);
-            // release lock on string
-            RN52_titleReady = false;
+        if(RN52_titleReady()) {
+            RN52_getTitle(lineCopy);
             
-            //printf("got title: %s\r\n", lineCopy);
             OLED_println(lineCopy, 1);
         }
         
-        if(RN52_artistReady) {
-            strncpy(lineCopy, RN52_artist, RX_LINE_LENGTH);
-            // release lock on string
-            RN52_artistReady = false;
+        if(RN52_artistReady()) {
+            RN52_getArtist(lineCopy);
             
-            //printf("got artist: %s\r\n", lineCopy);
             OLED_println(lineCopy, 2);
         }
         
