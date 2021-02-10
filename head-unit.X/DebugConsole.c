@@ -7,18 +7,8 @@ static volatile uint8_t debugConsoleBufferHead = 0;
 static volatile uint8_t debugConsoleBufferTail = 0;
 static volatile uint8_t debugConsoleBufferCount = 0;
 
-void DebugConsole_init(void) {
-    NOP();
-}
 
-bool DebugConsole_cmdReady(void) {
-    return debugConsoleCmdReady;
-}
-
-void DebugConsole_getCmd(char destString[]) {
-    strncpy(destString, debugConsoleCmd, RX_LINE_LENGTH);
-    debugConsoleCmdReady = false;
-}
+// Private Methods
 
 // UART1 RX ISR
 // debug console
@@ -67,4 +57,21 @@ void debugConsoleRX(void) {
         // add to buffer
         bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferCount, c);
     }
+}
+
+
+// Public Methods
+
+void DebugConsole_init(void) {
+    UART1_Initialize();
+    UART1_SetRxInterruptHandler(&debugConsoleRX);
+}
+
+bool DebugConsole_cmdReady(void) {
+    return debugConsoleCmdReady;
+}
+
+void DebugConsole_getCmd(char destString[]) {
+    strncpy(destString, debugConsoleCmd, RX_LINE_LENGTH);
+    debugConsoleCmdReady = false;
 }

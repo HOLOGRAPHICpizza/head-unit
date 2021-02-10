@@ -20,13 +20,7 @@ static volatile char lineCopy[RX_LINE_LENGTH];
 void main(void) {
     SYSTEM_Initialize();
     
-    // debug console
-    UART1_Initialize();
-    UART1_SetRxInterruptHandler(&debugConsoleRX);
-    
-    // RN52
-    UART2_Initialize();
-    UART2_SetRxInterruptHandler(&RN52_RX);
+    DebugConsole_init();
     
     OLED_init();
     
@@ -38,24 +32,7 @@ void main(void) {
     printf("\r\n\r\nPeak 15 Labs Head Unit\r\n");
     __delay_ms(10);
     
-    // init RN52
-    // the printf commands seems necessary to have a delay between commands
-    printf("name\r\n");
-    RN52_cmd("SN,Peak15_Labs"); // set device name
-    printf("I2S\r\n");
-    RN52_cmd("S|,0103");        // I2S 24bit 48kHz
-    printf("track change event\r\n");
-    RN52_cmd("S%,1000");        // disable all extended features except track change event
-    printf("service class\r\n");
-    RN52_cmd("SC,240420");      // service class car audio
-    printf("A2DP\r\n");
-    RN52_cmd("SD,04");          // A2DP protocol only
-    printf("A2DP\r\n");
-    RN52_cmd("SK,04");          // A2DP protocol only
-    printf("auth\r\n");
-    RN52_cmd("SA,0");           // open authentication
-    printf("discoverable\r\n");
-    RN52_cmd("@,1");            // make disoverabe
+    RN52_init();
     
     // idk if im gona use the timer
     TMR0_Initialize();
