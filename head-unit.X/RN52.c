@@ -17,10 +17,7 @@ static volatile bool _RN52_titleReady = false;
 static volatile char RN52_artist[RX_LINE_LENGTH];
 static volatile bool _RN52_artistReady = false;
 
-static volatile uint8_t RN52_buffer[RX_BUFFER_SIZE];
-static volatile uint8_t RN52_bufferHead = 0;
-static volatile uint8_t RN52_bufferTail = 0;
-static volatile uint8_t RN52_bufferCount = 0;
+static volatile struct RXBuffer _RN52_buffer;
 
 
 // Private Methods
@@ -47,7 +44,7 @@ void RN52_RX(void) {
     if(c == '\r') {
         // build string from buffer
         char line[RX_LINE_LENGTH];
-        buffer2string(RN52_buffer, &RN52_bufferHead, &RN52_bufferTail, &RN52_bufferCount, line);
+        RXBuffer2String(&_RN52_buffer, line);
         
         // is this title line?
         if(strncmp(line, "Title=", 6) == 0) {
@@ -80,7 +77,7 @@ void RN52_RX(void) {
     
     else {
         // add to buffer
-        bufferAppend(RN52_buffer, &RN52_bufferHead, &RN52_bufferCount, (uint8_t) c);
+        RXBufferAppend(&_RN52_buffer, (uint8_t) c);
     }
 }
 
@@ -88,6 +85,10 @@ void RN52_RX(void) {
 // Public Methods
 
 void RN52_init(void) {
+    _RN52_buffer.head = 0;
+    _RN52_buffer.tail = 0;
+    _RN52_buffer.count = 0;
+    
     UART2_Initialize();
     UART2_SetRxInterruptHandler(&RN52_RX);
     

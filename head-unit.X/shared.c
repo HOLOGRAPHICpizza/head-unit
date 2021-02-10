@@ -8,25 +8,25 @@ void panic(uint8_t vector) {
     }
 }
 
-void bufferAppend(uint8_t buffer[], uint8_t *head, uint8_t *count, char byte) {
-    uint8_t h = *head;
-    buffer[h] = byte;
-    *head = ++h;
-    if(RX_BUFFER_SIZE <= *head) {
-        *head = 0;
+void RXBufferAppend(struct RXBuffer *buffer, char byte) {
+    uint8_t h = buffer->head;
+    buffer->array[h] = byte;
+    buffer->head = ++h;
+    if(RX_BUFFER_SIZE <= buffer->head) {
+        buffer->head = 0;
     }
-    *count = *count + 1;
+    buffer->count = buffer->count + 1;
 }
 
-void buffer2string(uint8_t buffer[], uint8_t *head, uint8_t *tail, uint8_t *count, char string[]) {
+void RXBuffer2String(struct RXBuffer *buffer, char string[]) {
     uint8_t i = 0;
-    while(*count > 0) {
-        string[i] = (char) buffer[*tail];
-        *tail = *tail + 1;
-        if(*tail >= RX_BUFFER_SIZE) {
-            *tail = 0;
+    while(buffer->count > 0) {
+        string[i] = (char) buffer->array[buffer->tail];
+        buffer->tail = buffer->tail + 1;
+        if(buffer->tail >= RX_BUFFER_SIZE) {
+            buffer->tail = 0;
         }
-        *count = *count - 1;
+        buffer->count = buffer->count - 1;
         i++;
     }
     string[i] = 0;

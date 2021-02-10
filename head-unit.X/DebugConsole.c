@@ -2,10 +2,8 @@
 
 static volatile char debugConsoleCmd[RX_LINE_LENGTH];
 static volatile bool debugConsoleCmdReady = false;
-static volatile uint8_t debugConsoleBuffer[RX_BUFFER_SIZE];
-static volatile uint8_t debugConsoleBufferHead = 0;
-static volatile uint8_t debugConsoleBufferTail = 0;
-static volatile uint8_t debugConsoleBufferCount = 0;
+
+static volatile struct RXBuffer _DebugConsole_buffer;
 
 
 // Private Methods
@@ -32,12 +30,7 @@ void debugConsoleRX(void) {
         }
         
         // build string from buffer
-        buffer2string(
-                debugConsoleBuffer,
-                &debugConsoleBufferHead,
-                &debugConsoleBufferTail,
-                &debugConsoleBufferCount,
-                debugConsoleCmd);
+        RXBuffer2String(&_DebugConsole_buffer, debugConsoleCmd);
         
         // set flag and exit
         debugConsoleCmdReady = true;
@@ -55,7 +48,7 @@ void debugConsoleRX(void) {
     
     else {
         // add to buffer
-        bufferAppend(debugConsoleBuffer, &debugConsoleBufferHead, &debugConsoleBufferCount, c);
+        RXBufferAppend(&_DebugConsole_buffer, c);
     }
 }
 
@@ -63,6 +56,10 @@ void debugConsoleRX(void) {
 // Public Methods
 
 void DebugConsole_init(void) {
+    _DebugConsole_buffer.head = 0;
+    _DebugConsole_buffer.tail = 0;
+    _DebugConsole_buffer.count = 0;
+    
     UART1_Initialize();
     UART1_SetRxInterruptHandler(&debugConsoleRX);
 }
