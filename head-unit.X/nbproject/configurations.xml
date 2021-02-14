@@ -17,7 +17,6 @@
         <itemPath>mcc_generated_files/uart1.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/uart2.h</itemPath>
-        <itemPath>mcc_generated_files/tmr0.h</itemPath>
       </logicalFolder>
       <itemPath>OLED.h</itemPath>
       <itemPath>RN52.h</itemPath>
@@ -44,7 +43,6 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/uart1.c</itemPath>
         <itemPath>mcc_generated_files/uart2.c</itemPath>
-        <itemPath>mcc_generated_files/tmr0.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>OLED.c</itemPath>
@@ -139,6 +137,7 @@
         <property key="verbose" value="false"/>
         <property key="warning-level" value="-3"/>
         <property key="what-to-do" value="ignore"/>
+        <appendMe value="--msgdisable=520"/>
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum" value=""/>
@@ -194,7 +193,6 @@
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

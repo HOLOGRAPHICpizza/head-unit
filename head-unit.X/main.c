@@ -8,8 +8,6 @@
 // "SU,01" to permanently set to 9600 baud.
 // What GPIO7 does is unclear.
 
-//static volatile int getMetadata = 1;
-
 #include "shared.h"
 #include "OLED.h"
 #include "RN52.h"
@@ -33,11 +31,6 @@ void main(void) {
     __delay_ms(10);
     
     RN52_init();
-    
-    // idk if im gona use the timer
-    TMR0_Initialize();
-    //TMR0_SetInterruptHandler(&TMR0_method);
-    TMR0_StartTimer();
     
     while (true)
     {
@@ -76,12 +69,5 @@ void main(void) {
             
             OLED_println(lineCopy, 2);
         }
-        
-        //if(getMetadata % 3 == 0) {
-        //    getMetadata++;
-        //    
-        //    HEARTBEAT_Toggle();
-        //    //RN52_cmd("AD");
-        //}
     }
 }
