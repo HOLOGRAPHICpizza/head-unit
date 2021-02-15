@@ -8,6 +8,10 @@
 // "SU,01" to permanently set to 9600 baud.
 // What GPIO7 does is unclear.
 
+// disable function never called warnings
+#pragma warning disable 520
+#pragma warning disable 2053
+
 #include "shared.h"
 #include "OLED.h"
 #include "RN52.h"
