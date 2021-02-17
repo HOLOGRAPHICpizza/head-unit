@@ -2,6 +2,8 @@
 
 #include "OLED.h"
 
+volatile static bool _OLED_printing = false;
+
 void OLED_cmd(uint8_t cmd) {
     I2C1_Write1ByteRegister(OLED_ADDR, 0x80, cmd);
 }
@@ -12,6 +14,12 @@ void OLED_data(uint8_t data) {
 }
 
 void OLED_println(char string[], uint8_t lineNum) {
+    if(_OLED_printing) {
+        // ABORT THE MISSION
+        return;
+    }
+    _OLED_printing = true;
+    
     if(lineNum == 1) {
         OLED_cmd(0x80);
     }
@@ -35,6 +43,8 @@ void OLED_println(char string[], uint8_t lineNum) {
             OLED_data(' ');
         }
     }
+    
+    _OLED_printing = false;
 }
 
 void OLED_init(void) {
