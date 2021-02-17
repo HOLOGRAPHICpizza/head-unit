@@ -25,11 +25,11 @@ void main(void) {
     
     DebugConsole_init();
     
-    OLED_init();
-    
     INTERRUPT_Initialize();
     INTERRUPT_GlobalInterruptHighEnable();
     INTERRUPT_GlobalInterruptLowEnable();
+    
+    OLED_init();
     
     __delay_ms(10);
     printf("\r\n\r\nPeak 15 Labs Head Unit\r\n");
@@ -42,13 +42,14 @@ void main(void) {
     while (true)
     {
         if(DebugConsole_cmdReady()) {
-            //printf("got cmd: %s\r\n", debugConsoleCmd);
+            DebugConsole_getCmd(lineCopy);
             
-            /*char first = debugConsoleCmd[0];
+            // OLED Commands
+            char first = lineCopy[0];
             if(first == 'C' || first == 'D') {
                 char hex[2];
-                hex[0] = debugConsoleCmd[1];
-                hex[1] = debugConsoleCmd[2];
+                hex[0] = lineCopy[1];
+                hex[1] = lineCopy[2];
                 uint8_t byte = (uint8_t) strtoul(hex, NULL, 16);
                 
                 if(first == 'C') {
@@ -57,12 +58,11 @@ void main(void) {
                 else if(first == 'D') {
                     OLED_data(byte);
                 }
-            }*/
-            
-            DebugConsole_getCmd(lineCopy);
-            
-            // send command straight to RN52
-            RN52_cmd(lineCopy);
+            }
+            else {
+                // send command straight to RN52
+                RN52_cmd(lineCopy);
+            }
         }
         
         if(RN52_titleReady()) {
@@ -83,6 +83,10 @@ void main(void) {
             char volStr[16];
             snprintf(volStr, 16, "Volume: %u", volume);
             OLED_println(volStr, 1);
+        }
+        
+        if(OLED_readyToDraw()) {
+            OLED_draw();
         }
     }
 }

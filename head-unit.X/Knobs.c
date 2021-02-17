@@ -25,8 +25,8 @@ void Knobs_init(void) {
     ADCC_SetADIInterruptHandler(&_Knobs_ADC_ISR);
     
     TMR0_Initialize();
-    TMR0_StartTimer();
     TMR0_SetInterruptHandler(&_Knobs_TMR0_ISR);
+    TMR0_StartTimer();
 }
 
 bool Knobs_volumeChanged(void) {
