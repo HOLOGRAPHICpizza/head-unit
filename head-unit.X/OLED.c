@@ -13,19 +13,13 @@ volatile static bool _OLED_changed = false;
 volatile static bool _OLED_drawing = false;
 volatile static bool _OLED_readyToDraw = false;
 
-void _OLED_TMR1_ISR(void) {
-    if(!_OLED_drawing && _OLED_changed) {
-        _OLED_readyToDraw = true;
-    }
-}
-
 void OLED_cmd(uint8_t cmd) {
     I2C1_Write1ByteRegister(OLED_I2C_ADDR, 0x80, cmd);
 }
 
 void OLED_data(uint8_t data) {
     I2C1_Write1ByteRegister(OLED_I2C_ADDR, 0x40, data);
-    __delay_ms(OLED_DELAY);
+    //__delay_ms(OLED_DELAY);
 }
 
 // deprecated
@@ -186,10 +180,12 @@ void OLED_init(void) {
     OLED_cmd(0x0C);  //display ON
     __delay_ms(150);
     
-    TMR1_Initialize();
-    TMR1_SetInterruptHandler(&_OLED_TMR1_ISR);
-    TMR1_StartTimer();
-    
     OLED_println("    Peak 15", 1);
     OLED_println("      Labs", 2);
+}
+
+void OLED_tick(void) {
+    if(!_OLED_drawing && _OLED_changed) {
+        _OLED_readyToDraw = true;
+    }
 }

@@ -18,7 +18,13 @@
 #include "DebugConsole.h"
 #include "Knobs.h"
 
-static volatile char lineCopy[RX_LINE_LENGTH];
+static volatile char _Main_lineCopy[RX_LINE_LENGTH];
+static volatile uint8_t _Main_tickCount = 0;
+static volatile uint8_t _Main_lastTickCount = 0;
+
+void _Main_tick(void) {
+    _Main_tickCount++;
+}
 
 void main(void) {
     SYSTEM_Initialize();
@@ -39,17 +45,21 @@ void main(void) {
     
     Knobs_init();
     
+    TMR0_Initialize();
+    TMR0_SetInterruptHandler(&_Main_tick);
+    TMR0_StartTimer();
+    
     while (true)
     {
         if(DebugConsole_cmdReady()) {
-            DebugConsole_getCmd(lineCopy);
+            DebugConsole_getCmd(_Main_lineCopy);
             
             // OLED Commands
-            char first = lineCopy[0];
+            char first = _Main_lineCopy[0];
             if(first == 'C' || first == 'D') {
                 char hex[2];
-                hex[0] = lineCopy[1];
-                hex[1] = lineCopy[2];
+                hex[0] = _Main_lineCopy[1];
+                hex[1] = _Main_lineCopy[2];
                 uint8_t byte = (uint8_t) strtoul(hex, NULL, 16);
                 
                 if(first == 'C') {
@@ -61,20 +71,20 @@ void main(void) {
             }
             else {
                 // send command straight to RN52
-                RN52_cmd(lineCopy);
+                RN52_cmd(_Main_lineCopy);
             }
         }
         
         if(RN52_titleReady()) {
-            RN52_getTitle(lineCopy);
+            RN52_getTitle(_Main_lineCopy);
             
-            OLED_println(lineCopy, 1);
+            OLED_println(_Main_lineCopy, 1);
         }
         
         if(RN52_artistReady()) {
-            RN52_getArtist(lineCopy);
+            RN52_getArtist(_Main_lineCopy);
             
-            OLED_println(lineCopy, 2);
+            OLED_println(_Main_lineCopy, 2);
         }
         
         if(Knobs_volumeChanged()) {
@@ -87,6 +97,13 @@ void main(void) {
         
         if(OLED_readyToDraw()) {
             OLED_draw();
+        }
+        
+        if(_Main_tickCount != _Main_lastTickCount) {
+            Knobs_tick();
+            OLED_tick();
+            
+            _Main_lastTickCount = _Main_tickCount;
         }
     }
 }
