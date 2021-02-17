@@ -5,7 +5,7 @@
 #include "mcc_generated_files/examples/i2c1_master_example.h"
 
 #define OLED_ADDR 0x3C
-#define OLED_DELAY 25
+#define OLED_DELAY 15
 
 void OLED_init(void);
 void OLED_cmd(uint8_t cmd);

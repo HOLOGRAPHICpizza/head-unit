@@ -79,7 +79,10 @@ void main(void) {
         
         if(Knobs_volumeChanged()) {
             uint8_t volume = Knobs_getVolume();
-            printf("volume: %u\r\n", volume);
+            //printf("volume: %u\r\n", volume);
+            char volStr[16];
+            snprintf(volStr, 16, "Volume: %u", volume);
+            OLED_println(volStr, 1);
         }
     }
 }
