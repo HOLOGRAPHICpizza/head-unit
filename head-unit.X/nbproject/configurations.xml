@@ -17,11 +17,13 @@
         <itemPath>mcc_generated_files/uart1.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/uart2.h</itemPath>
+        <itemPath>mcc_generated_files/adcc.h</itemPath>
       </logicalFolder>
       <itemPath>OLED.h</itemPath>
       <itemPath>RN52.h</itemPath>
       <itemPath>shared.h</itemPath>
       <itemPath>DebugConsole.h</itemPath>
+      <itemPath>Knobs.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -43,12 +45,14 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/uart1.c</itemPath>
         <itemPath>mcc_generated_files/uart2.c</itemPath>
+        <itemPath>mcc_generated_files/adcc.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>OLED.c</itemPath>
       <itemPath>RN52.c</itemPath>
       <itemPath>shared.c</itemPath>
       <itemPath>DebugConsole.c</itemPath>
+      <itemPath>Knobs.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -16,6 +16,7 @@
 #include "OLED.h"
 #include "RN52.h"
 #include "DebugConsole.h"
+#include "Knobs.h"
 
 static volatile char lineCopy[RX_LINE_LENGTH];
 
@@ -35,6 +36,8 @@ void main(void) {
     __delay_ms(10);
     
     RN52_init();
+    
+    Knobs_init();
     
     while (true)
     {
@@ -72,6 +75,11 @@ void main(void) {
             RN52_getArtist(lineCopy);
             
             OLED_println(lineCopy, 2);
+        }
+        
+        if(Knobs_volumeChanged()) {
+            uint8_t volume = Knobs_getVolume();
+            printf("volume: %u\r\n", volume);
         }
     }
 }

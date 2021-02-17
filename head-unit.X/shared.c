@@ -4,7 +4,7 @@ void panic(uint8_t vector) {
     printf("PANIC %u", vector);        // this wont print from inside an ISR
     while(true) {
         __delay_ms(50);
-        HEARTBEAT_Toggle();
+        HEARTBEAT_OUT_Toggle();
     }
 }
 

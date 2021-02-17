@@ -5,6 +5,7 @@
         <group>
             <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/OLED.c</file>
             <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/shared.h</file>
+            <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/mcc_generated_files/uart1.c</file>
             <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/DebugConsole.c</file>
             <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/DebugConsole.h</file>
             <file>file:/mnt/data/documents/projects/head-unit/head-unit.X/main.c</file>

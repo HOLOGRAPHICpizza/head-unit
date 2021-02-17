@@ -65,25 +65,45 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
-// get/set HEARTBEAT aliases
-#define HEARTBEAT_TRIS                 TRISAbits.TRISA0
-#define HEARTBEAT_LAT                  LATAbits.LATA0
-#define HEARTBEAT_PORT                 PORTAbits.RA0
-#define HEARTBEAT_WPU                  WPUAbits.WPUA0
-#define HEARTBEAT_OD                   ODCONAbits.ODCA0
-#define HEARTBEAT_ANS                  ANSELAbits.ANSELA0
-#define HEARTBEAT_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
-#define HEARTBEAT_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
-#define HEARTBEAT_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
-#define HEARTBEAT_GetValue()           PORTAbits.RA0
-#define HEARTBEAT_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
-#define HEARTBEAT_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
-#define HEARTBEAT_SetPullup()          do { WPUAbits.WPUA0 = 1; } while(0)
-#define HEARTBEAT_ResetPullup()        do { WPUAbits.WPUA0 = 0; } while(0)
-#define HEARTBEAT_SetPushPull()        do { ODCONAbits.ODCA0 = 0; } while(0)
-#define HEARTBEAT_SetOpenDrain()       do { ODCONAbits.ODCA0 = 1; } while(0)
-#define HEARTBEAT_SetAnalogMode()      do { ANSELAbits.ANSELA0 = 1; } while(0)
-#define HEARTBEAT_SetDigitalMode()     do { ANSELAbits.ANSELA0 = 0; } while(0)
+// get/set HEARTBEAT_OUT aliases
+#define HEARTBEAT_OUT_TRIS                 TRISAbits.TRISA0
+#define HEARTBEAT_OUT_LAT                  LATAbits.LATA0
+#define HEARTBEAT_OUT_PORT                 PORTAbits.RA0
+#define HEARTBEAT_OUT_WPU                  WPUAbits.WPUA0
+#define HEARTBEAT_OUT_OD                   ODCONAbits.ODCA0
+#define HEARTBEAT_OUT_ANS                  ANSELAbits.ANSELA0
+#define HEARTBEAT_OUT_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
+#define HEARTBEAT_OUT_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
+#define HEARTBEAT_OUT_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
+#define HEARTBEAT_OUT_GetValue()           PORTAbits.RA0
+#define HEARTBEAT_OUT_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
+#define HEARTBEAT_OUT_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
+#define HEARTBEAT_OUT_SetPullup()          do { WPUAbits.WPUA0 = 1; } while(0)
+#define HEARTBEAT_OUT_ResetPullup()        do { WPUAbits.WPUA0 = 0; } while(0)
+#define HEARTBEAT_OUT_SetPushPull()        do { ODCONAbits.ODCA0 = 0; } while(0)
+#define HEARTBEAT_OUT_SetOpenDrain()       do { ODCONAbits.ODCA0 = 1; } while(0)
+#define HEARTBEAT_OUT_SetAnalogMode()      do { ANSELAbits.ANSELA0 = 1; } while(0)
+#define HEARTBEAT_OUT_SetDigitalMode()     do { ANSELAbits.ANSELA0 = 0; } while(0)
+
+// get/set VOLUME_IN aliases
+#define VOLUME_IN_TRIS                 TRISAbits.TRISA1
+#define VOLUME_IN_LAT                  LATAbits.LATA1
+#define VOLUME_IN_PORT                 PORTAbits.RA1
+#define VOLUME_IN_WPU                  WPUAbits.WPUA1
+#define VOLUME_IN_OD                   ODCONAbits.ODCA1
+#define VOLUME_IN_ANS                  ANSELAbits.ANSELA1
+#define VOLUME_IN_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
+#define VOLUME_IN_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
+#define VOLUME_IN_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
+#define VOLUME_IN_GetValue()           PORTAbits.RA1
+#define VOLUME_IN_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
+#define VOLUME_IN_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
+#define VOLUME_IN_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
+#define VOLUME_IN_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
+#define VOLUME_IN_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
+#define VOLUME_IN_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
+#define VOLUME_IN_SetAnalogMode()      do { ANSELAbits.ANSELA1 = 1; } while(0)
+#define VOLUME_IN_SetDigitalMode()     do { ANSELAbits.ANSELA1 = 0; } while(0)
 
 // get/set RB0 procedures
 #define RB0_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
