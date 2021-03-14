@@ -12,10 +12,9 @@ Time(ms)=189622
 
 #include "RN52.h"
 
-static volatile char RN52_title[RX_LINE_LENGTH];
-static volatile bool _RN52_titleReady = false;
-static volatile char RN52_artist[RX_LINE_LENGTH];
-static volatile bool _RN52_artistReady = false;
+static volatile char _RN52_title[RX_LINE_LENGTH];
+static volatile char _RN52_artist[RX_LINE_LENGTH];
+static volatile bool _RN52_metadataReady = false;
 
 static volatile struct RXBuffer _RN52_buffer;
 
@@ -49,24 +48,26 @@ void RN52_RX(void) {
         // is this title line?
         if(strncmp(line, "Title=", 6) == 0) {
             // check for race condition
-            if(_RN52_titleReady) {
+            if(_RN52_metadataReady) {
                 // oh shit we lost the race
+                //TODO: gonna just ignore this shit and see what happens
                 panic(3);
             }
             
-            strncpy(RN52_title, line + 6, RX_LINE_LENGTH - 6);
-            _RN52_titleReady = true;
+            strncpy(_RN52_title, line + 6, RX_LINE_LENGTH - 6);
+            _RN52_metadataReady = true;
         }
         // artist line?
         else if(strncmp(line, "Artist=", 7) == 0) {
             // check for race condition
-            if(_RN52_artistReady) {
+            if(_RN52_metadataReady) {
                 // oh shit we lost the race
+                //TODO: gonna just ignore this shit and see what happens
                 panic(4);
             }
             
-            strncpy(RN52_artist, line + 7, RX_LINE_LENGTH - 7);
-            _RN52_artistReady = true;
+            strncpy(_RN52_artist, line + 7, RX_LINE_LENGTH - 7);
+            _RN52_metadataReady = true;
         }
     }
     
@@ -124,20 +125,12 @@ void RN52_cmd(char cmd[]) {
     __delay_ms(25);
 }
 
-bool RN52_titleReady(void) {
-    return _RN52_titleReady;
+bool RN52_metadataReady(void) {
+    return _RN52_metadataReady;
 }
 
-void RN52_getTitle(char destString[]) {
-    strncpy(destString, RN52_title, RX_LINE_LENGTH);
-    _RN52_titleReady = false;
-}
-
-bool RN52_artistReady(void) {
-    return _RN52_artistReady;
-}
-
-void RN52_getArtist(char destString[]) {
-    strncpy(destString, RN52_artist, RX_LINE_LENGTH);
-    _RN52_artistReady = false;
+void RN52_getMetadata(char destTitleStr[], char destArtistStr[]) {
+    strncpy(destTitleStr, _RN52_title, RX_LINE_LENGTH);
+    strncpy(destArtistStr, _RN52_artist, RX_LINE_LENGTH);
+    _RN52_metadataReady = false;
 }

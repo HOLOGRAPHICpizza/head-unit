@@ -808,7 +808,9 @@ static inline void I2C1_MasterClearIrq(void)
 
 static inline void I2C1_MasterWaitForEvent(void)
 {
-    while(1)
+    //TODO: this is an untested crazy hack
+    uint16_t i = 0;
+    while(true)
     {
         if(PIR3bits.I2C1TXIF)
         {    
@@ -830,5 +832,10 @@ static inline void I2C1_MasterWaitForEvent(void)
         {
             break;
         }
+        i++;
+        if(i >= 255) {
+            break;
+        }
     }
+    NOP();
 }

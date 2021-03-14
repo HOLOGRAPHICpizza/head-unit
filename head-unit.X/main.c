@@ -18,7 +18,8 @@
 #include "DebugConsole.h"
 #include "Knobs.h"
 
-static volatile char _Main_lineCopy[RX_LINE_LENGTH];
+static volatile char _Main_scratchLine1[RX_LINE_LENGTH];
+static volatile char _Main_scratchLine2[RX_LINE_LENGTH];
 static volatile uint8_t _Main_tickCount = 0;
 static volatile uint8_t _Main_lastTickCount = 0;
 static volatile uint8_t _Main_restoreOLEDTick = 0;   // the tick to restore the OLED on
@@ -53,14 +54,14 @@ void main(void) {
     while (true)
     {
         if(DebugConsole_cmdReady()) {
-            DebugConsole_getCmd(_Main_lineCopy);
+            DebugConsole_getCmd(_Main_scratchLine1);
             
             // OLED Commands
-            char first = _Main_lineCopy[0];
+            char first = _Main_scratchLine1[0];
             if(first == 'C' || first == 'D') {
                 char hex[2];
-                hex[0] = _Main_lineCopy[1];
-                hex[1] = _Main_lineCopy[2];
+                hex[0] = _Main_scratchLine1[1];
+                hex[1] = _Main_scratchLine1[2];
                 uint8_t byte = (uint8_t) strtoul(hex, NULL, 16);
                 
                 if(first == 'C') {
@@ -72,20 +73,15 @@ void main(void) {
             }
             else {
                 // send command straight to RN52
-                RN52_cmd(_Main_lineCopy);
+                RN52_cmd(_Main_scratchLine1);
             }
         }
         
-        if(RN52_titleReady()) {
-            RN52_getTitle(_Main_lineCopy);
+        if(RN52_metadataReady()) {
+            RN52_getMetadata(_Main_scratchLine1, _Main_scratchLine2);
             
-            OLED_println(_Main_lineCopy, 1);
-        }
-        
-        if(RN52_artistReady()) {
-            RN52_getArtist(_Main_lineCopy);
-            
-            OLED_println(_Main_lineCopy, 2);
+            OLED_println(_Main_scratchLine1, 1);
+            OLED_println(_Main_scratchLine2, 2);
         }
         
         if(Knobs_volumeChanged()) {
