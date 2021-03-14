@@ -21,6 +21,7 @@
 static volatile char _Main_lineCopy[RX_LINE_LENGTH];
 static volatile uint8_t _Main_tickCount = 0;
 static volatile uint8_t _Main_lastTickCount = 0;
+static volatile uint8_t _Main_restoreOLEDTick = 0;   // the tick to restore the OLED on
 
 void _Main_tick(void) {
     _Main_tickCount++;
@@ -92,13 +93,22 @@ void main(void) {
             //printf("volume: %u\r\n", volume);
             char volStr[16];
             snprintf(volStr, 16, "Volume: %u", volume);
+            OLED_save();
             OLED_println(volStr, 1);
+            OLED_println("", 2);
+            _Main_restoreOLEDTick = _Main_tickCount + (INFO_DISPLAY_MS / TICK_MS);
+        }
+        
+        // time to stop displaying info?
+        if(_Main_tickCount == _Main_restoreOLEDTick) {
+            OLED_restore();
         }
         
         if(OLED_readyToDraw()) {
             OLED_draw();
         }
         
+        // Do a tick
         if(_Main_tickCount != _Main_lastTickCount) {
             Knobs_tick();
             OLED_tick();

@@ -13,6 +13,10 @@ volatile static bool _OLED_changed = false;
 volatile static bool _OLED_drawing = false;
 volatile static bool _OLED_readyToDraw = false;
 
+volatile static bool _OLED_saved = false;
+volatile static char _OLED_savedLine1[OLED_LINE_LENGTH] = OLED_BLANK_LINE;
+volatile static char _OLED_savedLine2[OLED_LINE_LENGTH] = OLED_BLANK_LINE;
+
 void OLED_cmd(uint8_t cmd) {
     I2C1_Write1ByteRegister(OLED_I2C_ADDR, 0x80, cmd);
 }
@@ -20,43 +24,6 @@ void OLED_cmd(uint8_t cmd) {
 void OLED_data(uint8_t data) {
     I2C1_Write1ByteRegister(OLED_I2C_ADDR, 0x40, data);
     //__delay_ms(OLED_DELAY);
-}
-
-// deprecated
-void _OLED_println(char string[], uint8_t lineNum) {
-    panic(69);
-    if(_OLED_printing) {
-        // ABORT THE MISSION
-        panic(10);
-        return;
-    }
-    _OLED_printing = true;
-    
-    if(lineNum == 1) {
-        OLED_cmd(0x80);
-    }
-    else if(lineNum == 2) {
-        OLED_cmd(0xC0);
-    }
-    
-    bool fill = false;
-    for(uint8_t i = 0; i < 16; i++) {
-        char c = string[i];
-        
-        // fill the rest with spaces
-        if(c == 0) {
-            fill = true;
-        }
-        
-        if(!fill) {
-            OLED_data(c);
-        }
-        else {
-            OLED_data(' ');
-        }
-    }
-    
-    _OLED_printing = false;
 }
 
 void _OLED_writeChangedChars(char line[], char lastLine[], uint8_t lineNum) {
@@ -187,5 +154,21 @@ void OLED_init(void) {
 void OLED_tick(void) {
     if(!_OLED_drawing && _OLED_changed) {
         _OLED_readyToDraw = true;
+    }
+}
+
+void OLED_save(void) {
+    if(!_OLED_saved) {
+        strncpy(_OLED_savedLine1, _OLED_line1, OLED_LINE_LENGTH);
+        strncpy(_OLED_savedLine2, _OLED_line2, OLED_LINE_LENGTH);
+        _OLED_saved = true;
+    }
+}
+
+void OLED_restore(void) {
+    if(_OLED_saved) {
+        OLED_println(_OLED_savedLine1, 1);
+        OLED_println(_OLED_savedLine2, 2);
+        _OLED_saved = false;
     }
 }

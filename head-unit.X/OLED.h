@@ -20,6 +20,12 @@ void OLED_data(uint8_t data);
 void OLED_println(char string[], uint8_t lineNum);
 void OLED_setChar(char c, uint8_t pos, uint8_t lineNum);
 
+// Save the current display. Subsequent calls do nothing until restore is called.
+void OLED_save(void);
+
+// Restore the saved display. Subsequent calls do nothing until save is called again. 
+void OLED_restore(void);
+
 void OLED_draw(void);
 bool OLED_readyToDraw(void);
 
