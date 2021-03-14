@@ -51,7 +51,8 @@ void RN52_RX(void) {
             // check for race condition
             if(_RN52_titleReady) {
                 // oh shit we lost the race
-                panic(3);
+                //TODO: Gonna bypass this shit and just see what happens.
+                //panic(3);
             }
             
             strncpy(RN52_title, line + 6, RX_LINE_LENGTH - 6);
@@ -62,7 +63,8 @@ void RN52_RX(void) {
             // check for race condition
             if(_RN52_artistReady) {
                 // oh shit we lost the race
-                panic(4);
+                //TODO: Gonna bypass this shit and just see what happens.
+                //panic(4);
             }
             
             strncpy(RN52_artist, line + 7, RX_LINE_LENGTH - 7);

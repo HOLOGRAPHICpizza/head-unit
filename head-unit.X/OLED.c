@@ -26,6 +26,8 @@ void OLED_data(uint8_t data) {
     //__delay_ms(OLED_DELAY);
 }
 
+
+// this algorithm has a problem with leaving lingering characters
 void _OLED_writeChangedChars(char line[], char lastLine[], uint8_t lineNum) {
     uint8_t rowOffset = 0x00;
     if(lineNum == 1) {
@@ -39,7 +41,7 @@ void _OLED_writeChangedChars(char line[], char lastLine[], uint8_t lineNum) {
     }
     
     uint8_t lastPos = 200;  // dummy high value
-    for(uint8_t i = 0; i < 16; i++) {
+    for(uint8_t i = 0; i < OLED_LINE_LENGTH; i++) {
         if(line[i] != lastLine[i]) {
             // allow consecutive writes without sending address
             if(i != lastPos + 1) {
@@ -53,6 +55,26 @@ void _OLED_writeChangedChars(char line[], char lastLine[], uint8_t lineNum) {
     }
 }
 
+// failsafe algorithm
+void _OLED_writeAllChars(char line[], char lastLine[], uint8_t lineNum) {
+    uint8_t rowOffset = 0x00;
+    if(lineNum == 1) {
+        rowOffset = OLED_DRAM_ROW1_OFFSET;
+    }
+    else if(lineNum == 2) {
+        rowOffset = OLED_DRAM_ROW2_OFFSET;
+    }
+    else {
+        panic(12);
+    }
+    
+    OLED_cmd(OLED_DRAM_ADDR | rowOffset);
+    
+    for(uint8_t i = 0; i < OLED_LINE_LENGTH; i++) {
+        OLED_data(line[i]);
+    }
+}
+
 void OLED_draw(void) {
     if(_OLED_drawing) {
         // ABORT THE MISSION
@@ -63,8 +85,10 @@ void OLED_draw(void) {
     _OLED_changed = false;
     _OLED_readyToDraw = false;
     
-    _OLED_writeChangedChars(_OLED_line1, _OLED_lastLine1, 1);
-    _OLED_writeChangedChars(_OLED_line2, _OLED_lastLine1, 2);
+    //_OLED_writeChangedChars(_OLED_line1, _OLED_lastLine1, 1);
+    //_OLED_writeChangedChars(_OLED_line2, _OLED_lastLine1, 2);
+    _OLED_writeAllChars(_OLED_line1, _OLED_lastLine1, 1);
+    _OLED_writeAllChars(_OLED_line2, _OLED_lastLine1, 2);
     
     strncpy(_OLED_lastLine1, _OLED_line1, OLED_LINE_LENGTH);
     strncpy(_OLED_lastLine2, _OLED_line2, OLED_LINE_LENGTH);
