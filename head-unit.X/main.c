@@ -17,6 +17,7 @@
 #include "RN52.h"
 #include "DebugConsole.h"
 #include "Knobs.h"
+#include "DSP.h"
 
 static volatile char _Main_scratchLine1[RX_LINE_LENGTH];
 static volatile char _Main_scratchLine2[RX_LINE_LENGTH];
@@ -51,6 +52,8 @@ void main(void) {
     TMR0_SetInterruptHandler(&_Main_tick);
     TMR0_StartTimer();
     
+    DSP_init();
+    
     while (true)
     {
         if(DebugConsole_cmdReady()) {
@@ -70,6 +73,12 @@ void main(void) {
                 else if(first == 'D') {
                     OLED_data(byte);
                 }
+            }
+            else if(first == 'G') {
+                DSP_GPIO_on();
+            }
+            else if(first == 'H') {
+                DSP_GPIO_off();
             }
             else {
                 // send command straight to RN52

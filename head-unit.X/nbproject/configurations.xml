@@ -26,6 +26,7 @@
       <itemPath>shared.h</itemPath>
       <itemPath>DebugConsole.h</itemPath>
       <itemPath>Knobs.h</itemPath>
+      <itemPath>DSP.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -57,6 +58,7 @@
       <itemPath>shared.c</itemPath>
       <itemPath>DebugConsole.c</itemPath>
       <itemPath>Knobs.c</itemPath>
+      <itemPath>DSP.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
