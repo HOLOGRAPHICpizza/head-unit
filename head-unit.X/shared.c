@@ -8,6 +8,10 @@ void panic(uint8_t vector) {
     }
 }
 
+void LATrigger(void) {
+    LATRIGGER_OUT_SetHigh();
+}
+
 void RXBufferAppend(struct RXBuffer *buffer, char byte) {
     uint8_t h = buffer->head;
     buffer->array[h] = byte;

@@ -129,6 +129,26 @@
 #define RB1_SetAnalogMode()         do { ANSELBbits.ANSELB1 = 1; } while(0)
 #define RB1_SetDigitalMode()        do { ANSELBbits.ANSELB1 = 0; } while(0)
 
+// get/set LATRIGGER_OUT aliases
+#define LATRIGGER_OUT_TRIS                 TRISCbits.TRISC2
+#define LATRIGGER_OUT_LAT                  LATCbits.LATC2
+#define LATRIGGER_OUT_PORT                 PORTCbits.RC2
+#define LATRIGGER_OUT_WPU                  WPUCbits.WPUC2
+#define LATRIGGER_OUT_OD                   ODCONCbits.ODCC2
+#define LATRIGGER_OUT_ANS                  ANSELCbits.ANSELC2
+#define LATRIGGER_OUT_SetHigh()            do { LATCbits.LATC2 = 1; } while(0)
+#define LATRIGGER_OUT_SetLow()             do { LATCbits.LATC2 = 0; } while(0)
+#define LATRIGGER_OUT_Toggle()             do { LATCbits.LATC2 = ~LATCbits.LATC2; } while(0)
+#define LATRIGGER_OUT_GetValue()           PORTCbits.RC2
+#define LATRIGGER_OUT_SetDigitalInput()    do { TRISCbits.TRISC2 = 1; } while(0)
+#define LATRIGGER_OUT_SetDigitalOutput()   do { TRISCbits.TRISC2 = 0; } while(0)
+#define LATRIGGER_OUT_SetPullup()          do { WPUCbits.WPUC2 = 1; } while(0)
+#define LATRIGGER_OUT_ResetPullup()        do { WPUCbits.WPUC2 = 0; } while(0)
+#define LATRIGGER_OUT_SetPushPull()        do { ODCONCbits.ODCC2 = 0; } while(0)
+#define LATRIGGER_OUT_SetOpenDrain()       do { ODCONCbits.ODCC2 = 1; } while(0)
+#define LATRIGGER_OUT_SetAnalogMode()      do { ANSELCbits.ANSELC2 = 1; } while(0)
+#define LATRIGGER_OUT_SetDigitalMode()     do { ANSELCbits.ANSELC2 = 0; } while(0)
+
 // get/set RC3 procedures
 #define RC3_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
 #define RC3_SetLow()             do { LATCbits.LATC3 = 0; } while(0)

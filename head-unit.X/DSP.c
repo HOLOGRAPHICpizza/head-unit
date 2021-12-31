@@ -48,6 +48,7 @@ void DSP_init(void) {
     TAS3103_SendData(&Dbuf,4);
     */
     
+    LATrigger();
     _DSP_mute();
     
     // I2S format

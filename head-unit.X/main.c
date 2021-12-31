@@ -52,7 +52,7 @@ void main(void) {
     TMR0_SetInterruptHandler(&_Main_tick);
     TMR0_StartTimer();
     
-    DSP_init();
+    //DSP_init();
     
     while (true)
     {
@@ -73,6 +73,9 @@ void main(void) {
                 else if(first == 'D') {
                     OLED_data(byte);
                 }
+            }
+            else if(first == 'I') {
+                DSP_init();
             }
             else if(first == 'G') {
                 DSP_GPIO_on();

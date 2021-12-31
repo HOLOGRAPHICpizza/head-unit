@@ -20,6 +20,7 @@ struct RXBuffer {
 };
 
 void panic(uint8_t vector);
+void LATrigger(void);
 void RXBufferAppend(struct RXBuffer *buffer, char byte);
 void RXBuffer2String(struct RXBuffer *buffer, char string[]);
 
